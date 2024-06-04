@@ -39,7 +39,10 @@ public class Graph {
     }
 
     public void printTree() {
-        nodes.stream().map(node -> "Node " + node.getId() + ": Parent " + node.getParent()).forEach(System.out::println);
+        for (Node node : nodes) {
+            String s = "Node " + node.getId() + ": Parent " + node.getParent();
+            System.out.println(s);
+        }
     }
 }
 
