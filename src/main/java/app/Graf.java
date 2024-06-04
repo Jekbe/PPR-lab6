@@ -1,10 +1,12 @@
 package app;
 
-import jakarta.jms.JMSException;
+import lombok.Getter;
+
 import java.util.List;
 
 public class Graf {
-    private List<Wezel> wezly;
+    private final List<Wezel> wezly;
+    @Getter
     private List<Polaczenie> poloczenia;
 
     public Graf(List<Wezel> wezly, List<Polaczenie> poloczenia){
@@ -13,7 +15,7 @@ public class Graf {
     }
 
     @lombok.SneakyThrows
-    public void start(String id) throws JMSException {
+    public void start(String id) {
         wezly.stream().filter(wezel -> wezel.getId().equals(id)).findFirst().ifPresent(Wezel::startEcho);
     }
 }
