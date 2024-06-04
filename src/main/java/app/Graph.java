@@ -19,8 +19,7 @@ public class Graph {
     }
 
     public void addEdge(int source, int destination) {
-        Edge edge = new Edge(source, destination);
-        nodes.get(source).addEdge(edge);
+        nodes.get(source).addEdge(new Edge(source, destination));
         nodes.get(destination).addEdge(new Edge(destination, source));
     }
 
@@ -39,10 +38,7 @@ public class Graph {
     }
 
     public void printTree() {
-        for (Node node : nodes) {
-            String s = "Node " + node.getId() + ": Parent " + node.getParent();
-            System.out.println(s);
-        }
+        nodes.stream().map(node -> "Node " + node.getId() + ": Parent " + node.getParent()).forEach(System.out::println);
     }
 }
 

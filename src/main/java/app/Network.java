@@ -7,7 +7,7 @@ import org.apache.logging.log4j.Logger;
 
 public class Network {
     private static final Logger logger = LogManager.getLogger(Network.class);
-    private static ConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+    private static final ConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
 
     public static void sendMessage(Message msg) {
         try (Connection connection = connectionFactory.createConnection();
@@ -17,7 +17,7 @@ public class Network {
             TextMessage jmsMessage = session.createTextMessage(msg.content);
             jmsMessage.setIntProperty("source", msg.source); // Ensure the property is set
             producer.send(jmsMessage);
-            logger.info("Message sent from " + msg.source + " to " + msg.destination);
+            logger.info("Message sent from {} to {}", msg.source, msg.destination);
         } catch (JMSException e) {
             logger.error("Failed to send message", e);
         }
@@ -33,13 +33,9 @@ public class Network {
                 while (true) {
                     TextMessage jmsMessage = (TextMessage) consumer.receive();
                     if (jmsMessage != null) {
-                        Integer source = jmsMessage.getIntProperty("source");
-                        if (source == null) {
-                            logger.error("Received message with null source property");
-                        } else {
-                            node.receiveMessage(new Message(source, node.getId(), jmsMessage.getText()));
-                            logger.info("Message received by " + node.getId() + " from " + source);
-                        }
+                        int source = jmsMessage.getIntProperty("source");
+                        node.receiveMessage(new Message(source, node.getId(), jmsMessage.getText()));
+                        logger.info("Message received by {} from {}", node.getId(), source);
                     }
                 }
             } catch (JMSException e) {
@@ -49,11 +45,7 @@ public class Network {
     }
 
     public static void broadcastMessage(int source, String content) {
-        for (Node node : Node.getAllNodes()) {
-            if (node.getId() != source) {
-                sendMessage(new Message(source, node.getId(), content));
-            }
-        }
+        Node.getAllNodes().stream().filter(node -> node.getId() != source).map(node -> new Message(source, node.getId(), content)).forEach(Network::sendMessage);
     }
 }
 
